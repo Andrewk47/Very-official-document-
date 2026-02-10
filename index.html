@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Super Offecial Question 💜</title>
+
+<style>
+* {
+   box-sizing: border-box;
+   font-family: "Poppins", sans-serif;
+}
+
+body {
+   margin: 0;
+   background: linear-gradient(135deg, #4b1b6a, #7a3db8);
+   color: white;
+   overflow: hidden;
+   height: 100vh;
+}
+
+.center {
+   position: absolute;
+   inset: 0;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   text-align: center;
+   transition: opacity 0.6s ease;
+}
+
+.fade-out {
+   opacity: 0;
+   pointer-events: none;
+}
+
+h1 {
+   font-size: 2rem;
+   margin-bottom: 30px;
+}
+
+.buttons {
+   display: flex;
+   gap: 20px;
+   position: relative;
+}
+
+button {
+   padding: 14px 28px;
+   font-size: 1.1rem;
+   border: none;
+   cursor: pointer;
+   border-radius: 12px;
+   transition: transform 0.3s ease, background 0.3s ease;
+}
+
+#yesBtn {
+   background: #d78cff;
+   color: #2a003f;
+}
+
+#noBtn {
+   background: #ff4d6d;
+   color: white;
+}
+
+/* Overlay */
+#imageOverlay {
+   display: none;
+   position: fixed;
+   inset: 0;
+   background: rgba(0,0,0,0.6);
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   z-index: 10;
+}
+
+#imageOverlay img {
+   width: 220px;
+   border-radius: 16px;
+   margin-bottom: 20px;
+}
+
+#trapText {
+   font-size: 1.4rem;
+   text-align: center;
+   min-height: 40px;
+}
+
+#replayBtn {
+   margin-top: 30px;
+   padding: 12px 26px;
+   background: #a855f7;
+   color: white;
+   border-radius: 10px;
+   opacity: 0;
+   pointer-events: none;
+   transition: opacity 1s ease;
+}
+
+#replayBtn.show {
+   opacity: 1;
+   pointer-events: auto;
+}
+
+/* Heart confetti */
+.heart {
+   position: fixed;
+   top: -20px;
+   width: 16px;
+   height: 16px;
+   background: pink;
+   transform: rotate(45deg);
+   animation: fall linear forwards;
+}
+
+.heart::before,
+.heart::after {
+   content: "";
+   position: absolute;
+   width: 16px;
+   height: 16px;
+   background: pink;
+   border-radius: 50%;
+}
+
+.heart::before {
+   top: -8px;
+   left: 0;
+}
+
+.heart::after {
+   left: -8px;
+   top: 0;
+}
+
+@keyframes fall {
+   to {
+       transform: translateY(100vh) rotate(45deg);
+       opacity: 0;
+   }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Question -->
+<div id="mainContent" class="center">
+   <h1> Question! Will you be my Valentine!? 💜</h1>
+   <div class="buttons">
+       <button id="yesBtn">Yes 😍</button>
+       <button id="noBtn">No 😤</button>
+   </div>
+</div>
+
+<!-- After YES -->
+<div id="imageOverlay" class="center">
+   <img src="https://i.pinimg.com/736x/13/fc/b5/13fcb5e1c9569fc22d9527eaa8a81c56.jpg" alt="Trapped">
+   <div id="trapText"></div>
+   <button id="replayBtn">Replay 🔁</button>
+</div>
+
+<!-- Audio -->
+<audio id="bgMusic" src="https://youtu.be/MalsRkzmnWU?t=6" loop></audio>
+<audio id="scream" src="https://www.myinstants.com/media/sounds/wilhelm-scream.mp3"></audio>
+
+<script>
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const overlay = document.getElementById("imageOverlay");
+const music = document.getElementById("bgMusic");
+const scream = document.getElementById("scream");
+const mainContent = document.getElementById("mainContent");
+const trapText = document.getElementById("trapText");
+const replayBtn = document.getElementById("replayBtn");
+
+const message = "hahaha you trapped now suckkerrrr";
+
+let screamCount = 0;
+let yesScale = 1;
+let noIsBall = false;
+
+// Utility: clamp movement inside screen
+function moveNoButtonSafely() {
+   const padding = 20;
+   const rect = noBtn.getBoundingClientRect();
+
+   const maxX = window.innerWidth - rect.width - padding;
+   const maxY = window.innerHeight - rect.height - padding;
+
+   const x = Math.random() * maxX + padding;
+   const y = Math.random() * maxY + padding;
+
+   noBtn.style.left = x + "px";
+   noBtn.style.top = y + "px";
+}
+
+// NO hover logic
+noBtn.addEventListener("mouseover", () => {
+   // scream escalation
+   screamCount++;
+   scream.volume = Math.min(0.2 + screamCount * 0.15, 1);
+   scream.playbackRate = 1 + screamCount * 0.1;
+   scream.currentTime = 0;
+   scream.play();
+
+   // YES grows
+   yesScale += 0.15;
+   yesBtn.style.transform = `scale(${yesScale})`;
+
+   // turn into ball ONCE
+   if (!noIsBall) {
+       const size = Math.max(noBtn.offsetWidth, noBtn.offsetHeight);
+       noBtn.style.width = size + "px";
+       noBtn.style.height = size + "px";
+       noBtn.style.borderRadius = "50%";
+
+       // switch to fixed positioning so it stays in viewport
+       noBtn.style.position = "fixed";
+       noIsBall = true;
+   }
+
+   moveNoButtonSafely();
+});
+
+// YES click
+yesBtn.addEventListener("click", () => {
+   if (navigator.vibrate) navigator.vibrate(50);
+
+   mainContent.classList.add("fade-out");
+   music.play();
+
+   setTimeout(() => {
+       overlay.style.display = "flex";
+       typeWriter();
+   }, 500);
+
+   setTimeout(createHearts, 1500);
+
+   setTimeout(() => {
+       replayBtn.classList.add("show");
+   }, 7000);
+});
+
+function typeWriter() {
+   trapText.textContent = "";
+   let i = 0;
+   const interval = setInterval(() => {
+       trapText.textContent += message[i];
+       i++;
+       if (i >= message.length) clearInterval(interval);
+   }, 60);
+}
+
+function createHearts() {
+   for (let i = 0; i < 80; i++) {
+       const heart = document.createElement("div");
+       heart.className = "heart";
+       heart.style.left = Math.random() * window.innerWidth + "px";
+       heart.style.animationDuration = (Math.random() * 2 + 2) + "s";
+       document.body.appendChild(heart);
+       setTimeout(() => heart.remove(), 4000);
+   }
+}
+
+// Replay
+replayBtn.addEventListener("click", () => {
+   overlay.style.display = "none";
+   replayBtn.classList.remove("show");
+   trapText.textContent = "";
+
+   screamCount = 0;
+   yesScale = 1;
+   yesBtn.style.transform = "scale(1)";
+
+   // reset NO button
+   noIsBall = false;
+   noBtn.style.position = "";
+   noBtn.style.width = "";
+   noBtn.style.height = "";
+   noBtn.style.borderRadius = "";
+   noBtn.style.left = "";
+   noBtn.style.top = "";
+
+   music.pause();
+   music.currentTime = 0;
+
+   mainContent.classList.remove("fade-out");
+});
+</script>
+
+</body>
+</html>
